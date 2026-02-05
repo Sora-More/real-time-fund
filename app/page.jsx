@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState, useMemo, useLayoutEffect } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import Announcement from "./components/Announcement";
-import zhifubaoImg from "./assets/zhifubao.png";
-import weixinImg from "./assets/weixin.png";
+import zhifubaoImg from "./assets/zhifubao.jpg";
+import weixinImg from "./assets/weixin.jpg";
 
 function PlusIcon(props) {
   return (
