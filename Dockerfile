@@ -1,5 +1,5 @@
 # ===== 构建阶段 =====
-FROM node:18-bullseye AS builder
+FROM node:22-bullseye AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
