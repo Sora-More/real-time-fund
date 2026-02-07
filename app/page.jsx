@@ -9,11 +9,22 @@ import zhifubaoImg from "./assets/zhifubao.jpg";
 import weixinImg from "./assets/weixin.jpg";
 import githubImg from "./assets/github.svg";
 import { supabase } from './lib/supabase';
+import packageJson from '../package.json';
 
 function PlusIcon(props) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
       <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function UpdateIcon(props) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -1187,14 +1198,15 @@ function SuccessModal({ message, onClose }) {
   );
 }
 
-function CloudConfigModal({ onConfirm, onCancel }) {
+function CloudConfigModal({ onConfirm, onCancel, type = 'empty' }) {
+  const isConflict = type === 'conflict';
   return (
     <motion.div
       className="modal-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="云端同步提示"
-      onClick={onCancel}
+      aria-label={isConflict ? "配置冲突提示" : "云端同步提示"}
+      onClick={isConflict ? undefined : onCancel}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -1210,21 +1222,25 @@ function CloudConfigModal({ onConfirm, onCancel }) {
         <div className="title" style={{ marginBottom: 12, justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <CloudIcon width="20" height="20" />
-            <span>云端暂无配置</span>
+            <span>{isConflict ? '发现配置冲突' : '云端暂无配置'}</span>
           </div>
-          <button className="icon-button" onClick={onCancel} style={{ border: 'none', background: 'transparent' }}>
-            <CloseIcon width="20" height="20" />
-          </button>
+          {!isConflict && (
+            <button className="icon-button" onClick={onCancel} style={{ border: 'none', background: 'transparent' }}>
+              <CloseIcon width="20" height="20" />
+            </button>
+          )}
         </div>
         <p className="muted" style={{ marginBottom: 20, fontSize: '14px', lineHeight: '1.6' }}>
-          是否将本地配置同步到云端？
+          {isConflict
+            ? '检测到本地配置比云端更新，请选择操作：'
+            : '是否将本地配置同步到云端？'}
         </p>
         <div className="row" style={{ flexDirection: 'column', gap: 12 }}>
           <button className="button" onClick={onConfirm}>
-            同步本地到云端
+            {isConflict ? '保留本地 (覆盖云端)' : '同步本地到云端'}
           </button>
           <button className="button secondary" onClick={onCancel}>
-            暂不同步
+            {isConflict ? '使用云端 (覆盖本地)' : '暂不同步'}
           </button>
         </div>
       </motion.div>
@@ -1837,6 +1853,34 @@ export default function HomePage() {
     }
   }, []);
 
+  // 检查更新
+  const [hasUpdate, setHasUpdate] = useState(false);
+  const [latestVersion, setLatestVersion] = useState('');
+
+  useEffect(() => {
+    const checkUpdate = async () => {
+      try {
+        const res = await fetch('https://api.github.com/repos/hzm0321/real-time-fund/releases/latest');
+        console.log(packageJson.version)
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.tag_name) {
+          const remoteVersion = data.tag_name.replace(/^v/, '');
+          if (remoteVersion !== packageJson.version) {
+            setHasUpdate(true);
+            setLatestVersion(remoteVersion);
+          }
+        }
+      } catch (e) {
+        console.error('Check update failed:', e);
+      }
+    };
+
+    checkUpdate();
+    const interval = setInterval(checkUpdate, 10 * 60 * 1000); // 10 minutes
+    return () => clearInterval(interval);
+  }, []);
+
   // 存储当前被划开的基金代码
   const [swipedFundCode, setSwipedFundCode] = useState(null);
 
@@ -2128,6 +2172,7 @@ export default function HomePage() {
 
   // 成功提示弹窗
   const [successModal, setSuccessModal] = useState({ open: false, message: '' });
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [cloudConfigModal, setCloudConfigModal] = useState({ open: false, userId: null });
   const syncDebounceRef = useRef(null);
   const lastSyncedRef = useRef('');
@@ -2169,14 +2214,27 @@ export default function HomePage() {
 
     localStorage.setItem = (key, value) => {
       originalSetItem(key, value);
-      if (keys.has(key)) scheduleSync();
+      if (keys.has(key)) {
+        if (!skipSyncRef.current) {
+          originalSetItem('localUpdatedAt', new Date().toISOString());
+        }
+        scheduleSync();
+      }
     };
     localStorage.removeItem = (key) => {
       originalRemoveItem(key);
-      if (keys.has(key)) scheduleSync();
+      if (keys.has(key)) {
+        if (!skipSyncRef.current) {
+          originalSetItem('localUpdatedAt', new Date().toISOString());
+        }
+        scheduleSync();
+      }
     };
     localStorage.clear = () => {
       originalClear();
+      if (!skipSyncRef.current) {
+        originalSetItem('localUpdatedAt', new Date().toISOString());
+      }
       scheduleSync();
     };
 
@@ -2397,14 +2455,14 @@ export default function HomePage() {
         if (!incoming || typeof incoming !== 'object') return;
         const incomingComparable = getComparablePayload(incoming);
         if (!incomingComparable || incomingComparable === lastSyncedRef.current) return;
-        await applyCloudConfig(incoming);
+        await applyCloudConfig(incoming, payload.new.updated_at);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user_configs', filter: `user_id=eq.${user.id}` }, async (payload) => {
         const incoming = payload?.new?.data;
         if (!incoming || typeof incoming !== 'object') return;
         const incomingComparable = getComparablePayload(incoming);
         if (!incomingComparable || incomingComparable === lastSyncedRef.current) return;
-        await applyCloudConfig(incoming);
+        await applyCloudConfig(incoming, payload.new.updated_at);
       })
       .subscribe();
     return () => {
@@ -2498,6 +2556,8 @@ export default function HomePage() {
       setUser(null);
     } catch (err) {
       console.error('登出失败', err);
+      setUserMenuOpen(false);
+      setUser(null);
     }
   };
 
@@ -3187,10 +3247,13 @@ export default function HomePage() {
     }
   };
 
-  const applyCloudConfig = async (cloudData) => {
+  const applyCloudConfig = async (cloudData, cloudUpdatedAt) => {
     if (!cloudData || typeof cloudData !== 'object') return;
     skipSyncRef.current = true;
     try {
+      if (cloudUpdatedAt) {
+        localStorage.setItem('localUpdatedAt', new Date(cloudUpdatedAt).toISOString());
+      }
       const nextFunds = Array.isArray(cloudData.funds) ? dedupeByCode(cloudData.funds) : [];
       setFunds(nextFunds);
       localStorage.setItem('funds', JSON.stringify(nextFunds));
@@ -3237,7 +3300,7 @@ export default function HomePage() {
     try {
       const { data, error } = await supabase
         .from('user_configs')
-        .select('id, data')
+        .select('id, data, updated_at')
         .eq('user_id', userId)
         .maybeSingle();
       if (error) throw error;
@@ -3246,14 +3309,22 @@ export default function HomePage() {
           .from('user_configs')
           .insert({ user_id: userId });
         if (insertError) throw insertError;
-        setCloudConfigModal({ open: true, userId });
+        setCloudConfigModal({ open: true, userId, type: 'empty' });
         return;
       }
       if (data?.data && typeof data.data === 'object' && Object.keys(data.data).length > 0) {
-        await applyCloudConfig(data.data);
+        const cloudTime = new Date(data.updated_at || 0).getTime();
+        const localTime = new Date(localStorage.getItem('localUpdatedAt') || 0).getTime();
+        
+        if (localTime > cloudTime + 2000) {
+          setCloudConfigModal({ open: true, userId, type: 'conflict', cloudData: data.data });
+          return;
+        }
+
+        await applyCloudConfig(data.data, data.updated_at);
         return;
       }
-      setCloudConfigModal({ open: true, userId });
+      setCloudConfigModal({ open: true, userId, type: 'empty' });
     } catch (e) {
       console.error('获取云端配置失败', e);
     }
@@ -3263,11 +3334,21 @@ export default function HomePage() {
     if (!userId) return;
     try {
       const payload = collectLocalPayload();
+      const now = new Date().toISOString();
       const { error: updateError } = await supabase
         .from('user_configs')
-        .update({ data: payload, updated_at: new Date().toISOString() })
-        .eq('user_id', userId);
+        .upsert(
+          { 
+            user_id: userId, 
+            data: payload, 
+            updated_at: now
+          }, 
+          { onConflict: 'user_id' }
+        );
       if (updateError) throw updateError;
+      
+      localStorage.setItem('localUpdatedAt', now);
+
       if (showTip) {
         setSuccessModal({ open: true, message: '已同步云端配置' });
       }
@@ -3440,7 +3521,8 @@ export default function HomePage() {
       tradeModal.open ||
       !!clearConfirm ||
       donateOpen ||
-      !!fundDeleteConfirm;
+      !!fundDeleteConfirm ||
+      updateModalOpen;
 
     if (isAnyModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -3465,7 +3547,8 @@ export default function HomePage() {
     actionModal.open,
     tradeModal.open,
     clearConfirm,
-    donateOpen
+    donateOpen,
+    updateModalOpen
   ]);
 
   useEffect(() => {
@@ -3497,6 +3580,16 @@ export default function HomePage() {
         </div>
         <div className="actions">
           <img alt="项目Github地址" src={githubImg.src} style={{ width: '30px', height: '30px', cursor: 'pointer' }} onClick={() => window.open("https://github.com/hzm0321/real-time-fund")} />
+          {hasUpdate && (
+            <div 
+              className="badge" 
+              title={`发现新版本 ${latestVersion}，点击前往下载`}
+              style={{ cursor: 'pointer', borderColor: 'var(--success)', color: 'var(--success)' }}
+              onClick={() => setUpdateModalOpen(true)}
+            >
+              <UpdateIcon width="14" height="14" />
+            </div>
+          )}
           <div className="badge" title="当前刷新频率">
             <span>刷新</span>
             <strong>{Math.round(refreshMs / 1000)}秒</strong>
@@ -4636,8 +4729,14 @@ export default function HomePage() {
       <AnimatePresence>
         {cloudConfigModal.open && (
           <CloudConfigModal
+            type={cloudConfigModal.type}
             onConfirm={handleSyncLocalConfig}
-            onCancel={() => setCloudConfigModal({ open: false, userId: null })}
+            onCancel={() => {
+              if (cloudConfigModal.type === 'conflict' && cloudConfigModal.cloudData) {
+                applyCloudConfig(cloudConfigModal.cloudData);
+              }
+              setCloudConfigModal({ open: false, userId: null });
+            }}
           />
         )}
       </AnimatePresence>
@@ -4711,6 +4810,56 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* 更新提示弹窗 */}
+      <AnimatePresence>
+        {updateModalOpen && (
+          <motion.div
+            className="modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="更新提示"
+            onClick={() => setUpdateModalOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ zIndex: 10002 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="glass card modal"
+              style={{ maxWidth: '400px' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="title" style={{ marginBottom: 12 }}>
+                <UpdateIcon width="20" height="20" style={{color: 'var(--success)'}} />
+                <span>更新提示</span>
+              </div>
+              <p className="muted" style={{ marginBottom: 24, fontSize: '14px', lineHeight: '1.6' }}>
+                检测到新版本，是否刷新浏览器以更新
+              </p>
+              <div className="row" style={{ gap: 12 }}>
+                <button 
+                  className="button secondary" 
+                  onClick={() => setUpdateModalOpen(false)} 
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text)' }}
+                >
+                  取消
+                </button>
+                <button 
+                  className="button" 
+                  onClick={() => window.location.reload()} 
+                  style={{ flex: 1, background: 'var(--success)', color: '#fff', border: 'none' }}
+                >
+                  刷新浏览器
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 登录模态框 */}
       {loginModalOpen && (
