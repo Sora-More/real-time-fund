@@ -91,6 +91,7 @@ docker compose up -d
 ## 💬 开发者交流群
 
 欢迎基金实时开发者加入微信群聊讨论开发与协作：
+
 <img src="./doc/webchatGroup.jpg" width="300">
 
 ## 📝 免责声明
