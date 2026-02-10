@@ -9,7 +9,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import Announcement from "./components/Announcement";
 import { DatePicker, DonateTabs, NumericInput, Stat } from "./components/Common";
-import { ChevronIcon, CloseIcon, CloudIcon, DragIcon, ExitIcon, GridIcon, ListIcon, LoginIcon, LogoutIcon, MailIcon, PlusIcon, RefreshIcon, SettingsIcon, SortIcon, StarIcon, TrashIcon, UpdateIcon, UserIcon } from "./components/Icons";
+import { ChevronIcon, CloseIcon, CloudIcon, DragIcon, ExitIcon, EyeIcon, EyeOffIcon, GridIcon, ListIcon, LoginIcon, LogoutIcon, MailIcon, PinIcon, PinOffIcon, PlusIcon, RefreshIcon, SettingsIcon, SortIcon, StarIcon, TrashIcon, UpdateIcon, UserIcon } from "./components/Icons";
 import githubImg from "./assets/github.svg";
 import weChatGroupImg from "./assets/weChatGroup.png";
 import { supabase, isSupabaseConfigured } from './lib/supabase';
@@ -281,7 +281,7 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
   });
   const [isAfter3pm, setIsAfter3pm] = useState(nowInTz().hour() >= 15);
   const [calcShare, setCalcShare] = useState(null);
-  
+
   const currentPendingTrades = useMemo(() => {
     return pendingTrades.filter(t => t.fundCode === fund?.code);
   }, [pendingTrades, fund]);
@@ -302,7 +302,7 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
           setShowPendingList(false);
       }
   }, [showPendingList, currentPendingTrades]);
-  
+
   const getEstimatePrice = () => fund?.estPricedCoverage > 0.05 ? fund?.estGsz : (typeof fund?.gsz === 'number' ? fund?.gsz : Number(fund?.dwjz));
   const [price, setPrice] = useState(getEstimatePrice());
   const [loadingPrice, setLoadingPrice] = useState(false);
@@ -312,7 +312,7 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
     if (date && fund?.code) {
         setLoadingPrice(true);
         setActualDate(null);
-        
+
         let queryDate = date;
         if (isAfter3pm) {
             queryDate = toTz(date).add(1, 'day').format('YYYY-MM-DD');
@@ -347,7 +347,7 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
   } else {
     sellFee = parseFloat(feeValue) || 0;
   }
-  
+
   const estimatedReturn = sellAmount - sellFee;
 
   useEffect(() => {
@@ -390,7 +390,7 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
   const isValid = isBuy
     ? (!!amount && !!feeRate && !!date && calcShare !== null)
     : (!!share && !!date);
-    
+
   const handleSetShareFraction = (fraction) => {
       if(availableShare > 0) {
           setShare((availableShare * fraction).toFixed(2));
@@ -429,12 +429,12 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
         </div>
 
         {!showPendingList && !showConfirm && currentPendingTrades.length > 0 && (
-            <div 
-                style={{ 
-                    marginBottom: 16, 
-                    background: 'rgba(230, 162, 60, 0.1)', 
-                    border: '1px solid rgba(230, 162, 60, 0.2)', 
-                    borderRadius: 8, 
+            <div
+                style={{
+                    marginBottom: 16,
+                    background: 'rgba(230, 162, 60, 0.1)',
+                    border: '1px solid rgba(230, 162, 60, 0.2)',
+                    borderRadius: 8,
                     padding: '8px 12px',
                     fontSize: '12px',
                     color: '#e6a23c',
@@ -453,8 +453,8 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
         {showPendingList ? (
             <div className="pending-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 <div className="pending-list-header" style={{ position: 'sticky', top: 0, zIndex: 1, background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(6px)', paddingBottom: 8, marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
-                    <button 
-                        className="button secondary" 
+                    <button
+                        className="button secondary"
                         onClick={() => setShowPendingList(false)}
                         style={{ padding: '4px 8px', fontSize: '12px' }}
                     >
@@ -481,9 +481,9 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
                                     <button
                                         className="button secondary"
                                         onClick={() => setRevokeTrade(trade)}
-                                        style={{ 
-                                            padding: '2px 8px', 
-                                            fontSize: '10px', 
+                                        style={{
+                                            padding: '2px 8px',
+                                            fontSize: '10px',
                                             height: 'auto',
                                             background: 'rgba(255,255,255,0.1)',
                                             color: 'var(--text)'
@@ -570,10 +570,10 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
                 )}
 
                 <div className="row" style={{ gap: 12 }}>
-                    <button 
-                        type="button" 
-                        className="button secondary" 
-                        onClick={() => setShowConfirm(false)} 
+                    <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => setShowConfirm(false)}
                         style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text)' }}
                     >
                         返回修改
@@ -652,10 +652,10 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
                 )}
 
                 <div className="row" style={{ gap: 12 }}>
-                    <button 
-                        type="button" 
-                        className="button secondary" 
-                        onClick={() => setShowConfirm(false)} 
+                    <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => setShowConfirm(false)}
                         style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text)' }}
                     >
                         返回修改
@@ -895,7 +895,7 @@ function TradeModal({ type, fund, holding, onClose, onConfirm, pendingTrades = [
                   </button>
                 </div>
               </div>
-              
+
               <div style={{ marginBottom: 12, fontSize: '12px' }}>
                 {loadingPrice ? (
                     <span className="muted">正在查询净值数据...</span>
@@ -1728,6 +1728,8 @@ function CountUp({ value, prefix = '', suffix = '', decimals = 2, className = ''
 
 function GroupSummary({ funds, holdings, groupName, getProfit }) {
   const [showPercent, setShowPercent] = useState(true);
+  const [isMasked, setIsMasked] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
   const rowRef = useRef(null);
   const [assetSize, setAssetSize] = useState(24);
   const [metricSize, setMetricSize] = useState(18);
@@ -1789,13 +1791,45 @@ function GroupSummary({ funds, holdings, groupName, getProfit }) {
   if (!summary.hasHolding) return null;
 
   return (
-    <div className="glass card" style={{ marginBottom: 16, padding: '16px 20px', background: 'rgba(255, 255, 255, 0.03)' }}>
+    <div className={isSticky ? "group-summary-sticky" : ""}>
+    <div className="glass card group-summary-card" style={{ marginBottom: 8, padding: '16px 20px', background: 'rgba(255, 255, 255, 0.03)', position: 'relative' }}>
+      <span
+        className="sticky-toggle-btn"
+        onClick={() => setIsSticky(!isSticky)}
+        style={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          width: 24,
+          height: 24,
+          padding: 4,
+          opacity: 0.6,
+          zIndex: 10,
+          color: 'var(--muted)'
+        }}
+      >
+        {isSticky ? <PinIcon width="14" height="14" /> : <PinOffIcon width="14" height="14" />}
+      </span>
       <div ref={rowRef} className="row" style={{ alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
-          <div className="muted" style={{ fontSize: '12px', marginBottom: 4 }}>{groupName}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <div className="muted" style={{ fontSize: '12px' }}>{groupName}</div>
+            <button
+              className="fav-button"
+              onClick={() => setIsMasked(value => !value)}
+              aria-label={isMasked ? '显示资产' : '隐藏资产'}
+              style={{ margin: 0, padding: 2, display: 'inline-flex', alignItems: 'center' }}
+            >
+              {isMasked ? <EyeOffIcon width="16" height="16" /> : <EyeIcon width="16" height="16" />}
+            </button>
+          </div>
           <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
             <span style={{ fontSize: '16px', marginRight: 2 }}>¥</span>
-            <CountUp value={summary.totalAsset} style={{ fontSize: assetSize }} />
+            {isMasked ? (
+              <span style={{ fontSize: assetSize, position: 'relative', top: 4 }}>******</span>
+            ) : (
+              <CountUp value={summary.totalAsset} style={{ fontSize: assetSize }} />
+            )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 24 }}>
@@ -1805,8 +1839,14 @@ function GroupSummary({ funds, holdings, groupName, getProfit }) {
               className={summary.totalProfitToday > 0 ? 'up' : summary.totalProfitToday < 0 ? 'down' : ''}
               style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}
             >
-              <span style={{ marginRight: 1 }}>{summary.totalProfitToday > 0 ? '+' : summary.totalProfitToday < 0 ? '-' : ''}</span>
-              <CountUp value={Math.abs(summary.totalProfitToday)} style={{ fontSize: metricSize }} />
+              {isMasked ? (
+                <span style={{ fontSize: metricSize }}>******</span>
+              ) : (
+                <>
+                  <span style={{ marginRight: 1 }}>{summary.totalProfitToday > 0 ? '+' : summary.totalProfitToday < 0 ? '-' : ''}</span>
+                  <CountUp value={Math.abs(summary.totalProfitToday)} style={{ fontSize: metricSize }} />
+                </>
+              )}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -1817,18 +1857,23 @@ function GroupSummary({ funds, holdings, groupName, getProfit }) {
               onClick={() => setShowPercent(!showPercent)}
               title="点击切换金额/百分比"
             >
-              <span style={{ marginRight: 1 }}>{summary.totalHoldingReturn > 0 ? '+' : summary.totalHoldingReturn < 0 ? '-' : ''}</span>
-              {showPercent ? (
-                <CountUp value={Math.abs(summary.returnRate)} suffix="%" style={{ fontSize: metricSize }} />
+              {isMasked ? (
+                <span style={{ fontSize: metricSize }}>******</span>
               ) : (
                 <>
-                  <CountUp value={Math.abs(summary.totalHoldingReturn)} style={{ fontSize: metricSize }} />
+                  <span style={{ marginRight: 1 }}>{summary.totalHoldingReturn > 0 ? '+' : summary.totalHoldingReturn < 0 ? '-' : ''}</span>
+                  {showPercent ? (
+                    <CountUp value={Math.abs(summary.returnRate)} suffix="%" style={{ fontSize: metricSize }} />
+                  ) : (
+                    <CountUp value={Math.abs(summary.totalHoldingReturn)} style={{ fontSize: metricSize }} />
+                  )}
                 </>
               )}
             </div>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
@@ -1909,7 +1954,7 @@ export default function HomePage() {
   const [holdings, setHoldings] = useState({}); // { [code]: { share: number, cost: number } }
   const [pendingTrades, setPendingTrades] = useState([]); // [{ id, fundCode, share, date, ... }]
   const [percentModes, setPercentModes] = useState({}); // { [code]: boolean }
-  
+
   const holdingsRef = useRef(holdings);
   const pendingTradesRef = useRef(pendingTrades);
 
@@ -2191,11 +2236,11 @@ export default function HomePage() {
 
       // 尝试获取智能净值
       const result = await fetchSmartFundNetValue(trade.fundCode, queryDate);
-      
+
       if (result && result.value > 0) {
         // 成功获取，执行交易
         const current = tempHoldings[trade.fundCode] || { share: 0, cost: 0 };
-        
+
         let newShare, newCost;
         if (trade.type === 'buy') {
              const feeRate = trade.feeRate || 0;
@@ -2208,7 +2253,7 @@ export default function HomePage() {
              newCost = current.cost;
              if (newShare === 0) newCost = 0;
         }
-        
+
         tempHoldings[trade.fundCode] = { share: newShare, cost: newCost };
         stateChanged = true;
         processedIds.add(trade.id);
@@ -2218,13 +2263,13 @@ export default function HomePage() {
     if (stateChanged) {
       setHoldings(tempHoldings);
       storageHelper.setItem('holdings', JSON.stringify(tempHoldings));
-      
+
       setPendingTrades(prev => {
           const next = prev.filter(t => !processedIds.has(t.id));
           storageHelper.setItem('pendingTrades', JSON.stringify(next));
           return next;
       });
-      
+
       showToast(`已处理 ${processedIds.size} 笔待定交易`, 'success');
     }
   };
@@ -2246,11 +2291,11 @@ export default function HomePage() {
             isAfter3pm: data.isAfter3pm,
             timestamp: Date.now()
         };
-        
+
         const next = [...pendingTrades, pending];
         setPendingTrades(next);
         storageHelper.setItem('pendingTrades', JSON.stringify(next));
-        
+
         setTradeModal({ open: false, fund: null, type: 'buy' });
         showToast('净值暂未更新，已加入待处理队列', 'info');
         return;
@@ -2362,6 +2407,17 @@ export default function HomePage() {
     userIdRef.current = user?.id || null;
   }, [user]);
 
+  const getFundCodesSignature = useCallback((value) => {
+    try {
+      const list = JSON.parse(value || '[]');
+      if (!Array.isArray(list)) return '';
+      const codes = list.map((item) => item?.code).filter(Boolean);
+      return Array.from(new Set(codes)).sort().join('|');
+    } catch (e) {
+      return '';
+    }
+  }, []);
+
   const scheduleSync = useCallback(() => {
     if (!userIdRef.current) return;
     if (skipSyncRef.current) return;
@@ -2376,9 +2432,14 @@ export default function HomePage() {
   }, []);
 
   const storageHelper = useMemo(() => {
-    const keys = new Set(['funds', 'favorites', 'groups', 'collapsedCodes', 'refreshMs', 'holdings', 'pendingTrades']);
-    const triggerSync = (key) => {
+    const keys = new Set(['funds', 'favorites', 'groups', 'collapsedCodes', 'refreshMs', 'holdings', 'pendingTrades', 'viewMode']);
+    const triggerSync = (key, prevValue, nextValue) => {
       if (keys.has(key)) {
+        if (key === 'funds') {
+          const prevSig = getFundCodesSignature(prevValue);
+          const nextSig = getFundCodesSignature(nextValue);
+          if (prevSig === nextSig) return;
+        }
         if (!skipSyncRef.current) {
           window.localStorage.setItem('localUpdatedAt', nowInTz().toISOString());
         }
@@ -2387,12 +2448,14 @@ export default function HomePage() {
     };
     return {
       setItem: (key, value) => {
+        const prevValue = key === 'funds' ? window.localStorage.getItem(key) : null;
         window.localStorage.setItem(key, value);
-        triggerSync(key);
+        triggerSync(key, prevValue, value);
       },
       removeItem: (key) => {
+        const prevValue = key === 'funds' ? window.localStorage.getItem(key) : null;
         window.localStorage.removeItem(key);
-        triggerSync(key);
+        triggerSync(key, prevValue, null);
       },
       clear: () => {
         window.localStorage.clear();
@@ -2402,19 +2465,32 @@ export default function HomePage() {
         scheduleSync();
       }
     };
-  }, [scheduleSync]);
+  }, [getFundCodesSignature, scheduleSync]);
 
   useEffect(() => {
-    const keys = new Set(['funds', 'favorites', 'groups', 'collapsedCodes', 'refreshMs', 'holdings', 'pendingTrades']);
+    const keys = new Set(['funds', 'favorites', 'groups', 'collapsedCodes', 'refreshMs', 'holdings', 'pendingTrades', 'viewMode']);
     const onStorage = (e) => {
-      if (!e.key || keys.has(e.key)) scheduleSync();
+      if (!e.key) return;
+      if (!keys.has(e.key)) return;
+      if (e.key === 'funds') {
+        const prevSig = getFundCodesSignature(e.oldValue);
+        const nextSig = getFundCodesSignature(e.newValue);
+        if (prevSig === nextSig) return;
+      }
+      scheduleSync();
     };
     window.addEventListener('storage', onStorage);
     return () => {
       window.removeEventListener('storage', onStorage);
       if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
     };
-  }, [scheduleSync]);
+  }, [getFundCodesSignature, scheduleSync]);
+
+  const applyViewMode = useCallback((mode) => {
+    if (mode !== 'card' && mode !== 'list') return;
+    setViewMode(mode);
+    storageHelper.setItem('viewMode', mode);
+  }, [storageHelper]);
 
   const toggleFavorite = (code) => {
     setFavorites(prev => {
@@ -2569,6 +2645,10 @@ export default function HomePage() {
       const savedHoldings = JSON.parse(localStorage.getItem('holdings') || '{}');
       if (savedHoldings && typeof savedHoldings === 'object') {
         setHoldings(savedHoldings);
+      }
+      const savedViewMode = localStorage.getItem('viewMode');
+      if (savedViewMode === 'card' || savedViewMode === 'list') {
+        setViewMode(savedViewMode);
       }
     } catch { }
   }, []);
@@ -2942,7 +3022,7 @@ export default function HomePage() {
 
   const toggleViewMode = () => {
     const nextMode = viewMode === 'card' ? 'list' : 'card';
-    setViewMode(nextMode);
+    applyViewMode(nextMode);
   };
 
   const requestRemoveFund = (fund) => {
@@ -3153,6 +3233,8 @@ export default function HomePage() {
           })
       : [];
 
+    const viewMode = payload.viewMode === 'list' ? 'list' : 'card';
+
     return JSON.stringify({
       funds: uniqueFundCodes,
       favorites,
@@ -3160,7 +3242,8 @@ export default function HomePage() {
       collapsedCodes,
       refreshMs: Number.isFinite(payload.refreshMs) ? payload.refreshMs : 30000,
       holdings,
-      pendingTrades
+      pendingTrades,
+      viewMode
     });
   }
 
@@ -3170,6 +3253,7 @@ export default function HomePage() {
       const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
       const groups = JSON.parse(localStorage.getItem('groups') || '[]');
       const collapsedCodes = JSON.parse(localStorage.getItem('collapsedCodes') || '[]');
+      const viewMode = localStorage.getItem('viewMode') === 'list' ? 'list' : 'card';
       const fundCodes = new Set(
         Array.isArray(funds)
           ? funds.map((f) => f?.code).filter(Boolean)
@@ -3226,6 +3310,7 @@ export default function HomePage() {
         refreshMs: parseInt(localStorage.getItem('refreshMs') || '30000', 10),
         holdings: cleanedHoldings,
         pendingTrades: cleanedPendingTrades,
+        viewMode,
         exportedAt: nowInTz().toISOString()
       };
     } catch {
@@ -3237,6 +3322,7 @@ export default function HomePage() {
         refreshMs: 30000,
         holdings: {},
         pendingTrades: [],
+        viewMode: 'card',
         exportedAt: nowInTz().toISOString()
       };
     }
@@ -3272,7 +3358,7 @@ export default function HomePage() {
       storageHelper.setItem('refreshMs', String(nextRefreshMs));
 
       if (cloudData.viewMode === 'card' || cloudData.viewMode === 'list') {
-        setViewMode(cloudData.viewMode);
+        applyViewMode(cloudData.viewMode);
       }
 
       const nextHoldings = cloudData.holdings && typeof cloudData.holdings === 'object' ? cloudData.holdings : {};
@@ -3347,11 +3433,11 @@ export default function HomePage() {
       const { data: upsertData, error: updateError } = await supabase
         .from('user_configs')
         .upsert(
-          { 
-            user_id: userId, 
-            data: payload, 
+          {
+            user_id: userId,
+            data: payload,
             updated_at: now
-          }, 
+          },
           { onConflict: 'user_id' }
         )
         .select();
@@ -3360,7 +3446,7 @@ export default function HomePage() {
       if (!upsertData || upsertData.length === 0) {
         throw new Error('同步失败：未写入任何数据，请检查账号状态或重新登录');
       }
-      
+
       storageHelper.setItem('localUpdatedAt', now);
 
       if (showTip) {
@@ -3389,6 +3475,7 @@ export default function HomePage() {
         groups: JSON.parse(localStorage.getItem('groups') || '[]'),
         collapsedCodes: JSON.parse(localStorage.getItem('collapsedCodes') || '[]'),
         refreshMs: parseInt(localStorage.getItem('refreshMs') || '30000', 10),
+        viewMode: localStorage.getItem('viewMode') === 'list' ? 'list' : 'card',
         holdings: JSON.parse(localStorage.getItem('holdings') || '{}'),
         pendingTrades: JSON.parse(localStorage.getItem('pendingTrades') || '[]'),
         exportedAt: nowInTz().toISOString()
@@ -3494,7 +3581,7 @@ export default function HomePage() {
           storageHelper.setItem('refreshMs', String(data.refreshMs));
         }
         if (data.viewMode === 'card' || data.viewMode === 'list') {
-          setViewMode(data.viewMode);
+          applyViewMode(data.viewMode);
         }
 
         if (data.holdings && typeof data.holdings === 'object') {
@@ -3881,7 +3968,7 @@ export default function HomePage() {
         </div>
 
         <div className="col-12">
-          <div className="filter-bar" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div className="filter-bar" style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div className="tabs-container">
               <div
                 className="tabs-scroll-area"
@@ -3962,7 +4049,7 @@ export default function HomePage() {
               <div className="view-toggle" style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '2px' }}>
                 <button
                   className={`icon-button ${viewMode === 'card' ? 'active' : ''}`}
-                  onClick={() => { setViewMode('card'); }}
+                  onClick={() => { applyViewMode('card'); }}
                   style={{ border: 'none', width: '32px', height: '32px', background: viewMode === 'card' ? 'var(--primary)' : 'transparent', color: viewMode === 'card' ? '#05263b' : 'var(--muted)' }}
                   title="卡片视图"
                 >
@@ -3970,7 +4057,7 @@ export default function HomePage() {
                 </button>
                 <button
                   className={`icon-button ${viewMode === 'list' ? 'active' : ''}`}
-                  onClick={() => { setViewMode('list'); }}
+                  onClick={() => { applyViewMode('list'); }}
                   style={{ border: 'none', width: '32px', height: '32px', background: viewMode === 'list' ? 'var(--primary)' : 'transparent', color: viewMode === 'list' ? '#05263b' : 'var(--muted)' }}
                   title="表格视图"
                 >
@@ -4041,11 +4128,11 @@ export default function HomePage() {
           ) : (
             <>
               <GroupSummary
-                funds={displayFunds}
-                holdings={holdings}
-                groupName={getGroupName()}
-                getProfit={getHoldingProfit}
-              />
+                  funds={displayFunds}
+                  holdings={holdings}
+                  groupName={getGroupName()}
+                  getProfit={getHoldingProfit}
+                />
 
               {currentTab !== 'all' && currentTab !== 'fav' && (
                 <motion.button
@@ -4938,9 +5025,9 @@ export default function HomePage() {
                   更新内容如下：
                 </p>
                 {updateContent && (
-                  <div style={{ 
-                    background: 'rgba(0,0,0,0.2)', 
-                    padding: '12px', 
+                  <div style={{
+                    background: 'rgba(0,0,0,0.2)',
+                    padding: '12px',
                     borderRadius: '8px',
                     fontSize: '13px',
                     lineHeight: '1.5',
@@ -4954,16 +5041,16 @@ export default function HomePage() {
                 )}
               </div>
               <div className="row" style={{ gap: 12 }}>
-                <button 
-                  className="button secondary" 
-                  onClick={() => setUpdateModalOpen(false)} 
+                <button
+                  className="button secondary"
+                  onClick={() => setUpdateModalOpen(false)}
                   style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text)' }}
                 >
                   取消
                 </button>
-                <button 
-                  className="button" 
-                  onClick={() => window.location.reload()} 
+                <button
+                  className="button"
+                  onClick={() => window.location.reload()}
                   style={{ flex: 1, background: 'var(--success)', color: '#fff', border: 'none' }}
                 >
                   刷新浏览器
@@ -5078,7 +5165,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
-      
+
       {/* 全局轻提示 Toast */}
       <AnimatePresence>
         {toast.show && (
@@ -5092,8 +5179,8 @@ export default function HomePage() {
               left: '50%',
               zIndex: 9999,
               padding: '10px 20px',
-              background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 
-                          toast.type === 'success' ? 'rgba(34, 197, 94, 0.9)' : 
+              background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.9)' :
+                          toast.type === 'success' ? 'rgba(34, 197, 94, 0.9)' :
                           'rgba(30, 41, 59, 0.9)',
               color: '#fff',
               borderRadius: '8px',
